@@ -63,9 +63,9 @@ class Recipe(models.Model):
                               verbose_name='recipe_photo')
     text = models.TextField(null=False, blank=False,
                             verbose_name='recipe_text')
-    ingredients = models.ManyToManyField(Ingredient, blank=False,
-                                          through='IngredientForRecipe',
-                                          related_name='ingredients')
+    ingredient = models.ManyToManyField(Ingredient, blank=False,
+                                        through='IngredientForRecipe',
+                                        related_name='ingredients')
     tags = models.ManyToManyField(Tag, blank=False, related_name='tags',
                                   verbose_name='recipe_tag')
     cooking_time = models.FloatField(null=False, blank=False,
@@ -84,7 +84,7 @@ class Recipe(models.Model):
 
 class IngredientForRecipe(models.Model):
     """The model describes the ingredients for recipe."""
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name='ingredients_recipe',
@@ -106,7 +106,7 @@ class IngredientForRecipe(models.Model):
         verbose_name_plural = 'Ingredients_for_recipe'
 
     def __str__(self):
-        return f'{self.ingredients} {self.recipe}' 
+        return f'{self.recipe} {self.amount}'
 
 
 class Follow(models.Model):
@@ -161,11 +161,13 @@ class Download(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='user_who_has_download_recipe',
+        related_name='download'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='download_recipe',
+        related_name='download'
     )
 
     class Meta:

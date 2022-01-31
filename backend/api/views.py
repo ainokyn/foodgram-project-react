@@ -1,21 +1,25 @@
-from app.models import Follow, Ingredient, Recipe, Tag, Favorite, Download
+from app.models import Download, Favorite, Follow, Ingredient, Recipe, Tag, IngredientForRecipe
 from django.contrib.auth import get_user_model
-from rest_framework import  generics, status, viewsets, permissions
-from rest_framework.generics import  get_object_or_404
+from django.db.models import Sum
+from django.shortcuts import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import filters
-from rest_framework.decorators import api_view
-from rest_framework.pagination import PageNumberPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response 
+from rest_framework.decorators import action
+from collections import Counter
+from functools import reduce
+
 from .permissions import AnonymAdminAuthor
-from .serializers import (FollowListSerializer, FollowSerializer,
-                          RecipeSerializer,
-                          ListRecipeSerializer, TagSerializer, UserSerializer,
-                          FavoriteSerializer, IngredientsSerializer,
-                          DownloadSerializer)
+from .serializers import (DownloadSerializer, FavoriteSerializer,
+                          FollowListSerializer, FollowSerializer,
+                          IngredientsSerializer, ListRecipeSerializer,
+                          RecipeSerializer, TagSerializer, UserSerializer)
 
 User = get_user_model()
 
@@ -40,49 +44,48 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return ListRecipeSerializer
         else:
             return RecipeSerializer
+            
+#@api_view(['POST'])
+#def create_post(request):
+    #serializer = RecipeSerializer(data=request.data,
+    #                              context={'request': request})
+    #if serializer.is_valid():
+        #serializer.save()
+        #return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(UserViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class FollowAPI(APIView):
-    serializer_class = FollowSerializer()
 
     def get(self, request, user_id):
         user = self.request.user
         author = get_object_or_404(User, id=user_id)
         follow = Follow.objects.filter(user=user, author=author)
-        serializer = FollowSerializer(follow, many=True)
+        serializer = FollowSerializer(follow, many=True,
+                                      data=request.data,
+                                      context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, user_id):
-        user = self.request.user
-        author = get_object_or_404(User, id=user_id)
-        follow = Follow.objects.filter(user=user, author=author)
-        if author == user:
-            return Response(
-                'Нельзя на себя подписаться!!!!',
-                status=status.HTTP_400_BAD_REQUEST)
-        if follow.exists():
-            return Response(
-                'Такая подписка уже существует',
-                status=status.HTTP_400_BAD_REQUEST)
-        Follow.objects.create(user=user, author=author)
-        serializer = FollowSerializer(follow, many=True)
+        data = {'user': request.user.id, 'author': user_id}
+        serializer = FollowSerializer(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, user_id):
-        user = self.request.user
+        user = request.user
         author = get_object_or_404(User, id=user_id)
         if not Follow.objects.filter(user=user, author=author).exists():
-            return Response(
-                'Такой подписки нет',
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response('Нельзя удалить подписку, которой нет!')
         Follow.objects.filter(user=user, author=author).delete()
-        return Response('Подписка успешно удалена',
+        return Response('Подписка успешно удалена!',
                         status=status.HTTP_204_NO_CONTENT)
 
 
@@ -101,9 +104,9 @@ class FavoriteAPI(APIView):
     serializer_class = FavoriteSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-    def post(self, request, favorite_id):
+    def post(self, request, recipe_id):
         user = self.request.user
-        recipe = get_object_or_404(Recipe, id=favorite_id)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
         favorite = Favorite.objects.filter(recipe=recipe, user=user)
         if favorite.exists():
             return Response(
@@ -113,9 +116,9 @@ class FavoriteAPI(APIView):
         serializer = FavoriteSerializer(favorite, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, favorite_id):
+    def delete(self, request, recipe_id):
         user = self.request.user
-        recipe = get_object_or_404(Recipe, id=favorite_id)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
         favorite = Favorite.objects.filter(recipe=recipe, user=user)
         if not favorite.exists():
             return Response(
@@ -161,14 +164,44 @@ class DownloadAPI(APIView):
         return Response('Рецепт успешно удален из ссписка покупок',
                         status=status.HTTP_204_NO_CONTENT)
 
+
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     search_fields = ('^name',)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
 
+
 @api_view(['GET'])
 def download_list(request):
-    if request.method == 'POST':
-        return Response({'message': 'Получены данные', 'data': request.data})
-    return Response({'message': 'Это был GET-запрос!'}) 
+    user = request.user
+    download = {}
+    dls = Download.objects.filter(user=user).all()
+    for dl in dls:
+        racepe = dl.recipe
+        ings = IngredientForRecipe.objects.filter(recipe=racepe)
+        for ing in ings:
+            amount = ing.amount
+            unit = ing.ingredient.measurement_unit
+            name = ing.ingredient.name
+            if name not in download:
+                download[name] = {'amount': amount, 'unit': unit}
+            else:
+                amount += download[name]['amount']
+                download[name] = {'amount': amount, 'unit': unit}
+        my_product_list = list()
+        my_product_list.append(download)
+
+    response = HttpResponse(my_product_list, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; my_product_list.txt'
+    return response
+
+
+
+
+
+
+
+
+
+

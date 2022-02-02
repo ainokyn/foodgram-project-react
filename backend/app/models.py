@@ -19,6 +19,7 @@ class Ingredient(models.Model):
                                         null=False, blank=False,)
 
     class Meta:
+        """Performs sorting."""
         ordering = ('id',)
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
@@ -41,6 +42,7 @@ class Tag(models.Model):
                             unique=True, null=False, blank=False)
 
     class Meta:
+        """Performs sorting."""
         ordering = ('id',)
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'
@@ -74,6 +76,7 @@ class Recipe(models.Model):
                                     auto_now_add=True, db_index=True)
 
     class Meta:
+        """Performs sorting."""
         ordering = ('-pub_date',)
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
@@ -101,6 +104,7 @@ class IngredientForRecipe(models.Model):
     )
 
     class Meta:
+        """Performs sorting."""
         ordering = ('id',)
         verbose_name = 'Ingredient_for_recipe'
         verbose_name_plural = 'Ingredients_for_recipe'
@@ -138,11 +142,13 @@ class Favorite(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='user_who_has_favorite_recipe',
+        related_name='fovorite'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='favorite_recipe',
+        related_name='fovorite'
     )
 
     class Meta:

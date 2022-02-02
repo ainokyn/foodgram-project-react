@@ -25,14 +25,15 @@ class MyUserManager(BaseUserManager):
             username=username,
             first_name=first_name,
             last_name=last_name,
-            
+
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self,  email, username, first_name, last_name, password=None):
+    def create_superuser(self,  email, username, first_name, last_name,
+                         password=None):
         """Creates and saves a superuser with the given email and password."""
         user = self.create_user(
             email=email,
@@ -62,12 +63,11 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(max_length=150, blank=False, null=False)
     last_name = models.CharField(max_length=150, blank=False, null=False)
-    password = models.CharField(max_length=150, blank=False, null=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     objects = MyUserManager()
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password' ]
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
 
     def is_admin(self):
         """Check if user is admin."""

@@ -1,19 +1,21 @@
 import base64
 import imghdr
 import uuid
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions as django_exceptions
 from app.models import (Download, Favorite, Follow, Ingredient,
                         IngredientForRecipe, Recipe, Tag)
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
+from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
+    """Serializer for image field."""
 
     def to_internal_value(self, data):
         if 'data:' in data and ';base64,' in data:
@@ -34,15 +36,17 @@ class Base64ImageField(serializers.ImageField):
         return extension
 
 
-class UserSerializer(UserSerializer):
+class UserSerializer(UserCreateSerializer):
+    """Serializer for user requests."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed', )
+                  'is_subscribed', 'password' )
 
     def get_is_subscribed(self, obj):
+        """Method to get subscribers."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
@@ -67,7 +71,7 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
 
 class IngredientsForCreateRecipeSerializer(serializers.ModelSerializer):
-    """Serializer for ingredients requests."""
+    """Serializer for ingredients for create recipe requests."""
     id = serializers.IntegerField()
 
     class Meta:
@@ -76,7 +80,7 @@ class IngredientsForCreateRecipeSerializer(serializers.ModelSerializer):
 
 
 class IngredientsForRecipeSerializer(serializers.ModelSerializer):
-    """Serializer for ingredients requests."""
+    """Serializer for ingredients  for recipe requests."""
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -111,26 +115,31 @@ class ListRecipeSerializer(serializers.Serializer):
     cooking_time = serializers.CharField()
 
     def validate_cooking_time(self, cooking_time):
-        """ Check thr time of cooking."""
+        """ Check the time of cooking."""
         if cooking_time <= 1:
-            raise serializers.ValidationError("invalid value")
+            raise serializers.ValidationError("Время приготовления должно"
+                                              " быть от 1 минуты")
         return cooking_time
 
     def get_ingredients(self, recipe):
+        """ Get pull of ingreients for recipe."""
         queryset = IngredientForRecipe.objects.filter(
                                                    recipe__id=recipe.id).all()
         return IngredientsForRecipeSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
+        """ Get favorite recipe."""
         curent_user = self.context.get('request').user
         return Favorite.objects.filter(recipe=obj, user=curent_user).exists()
 
     def get_is_in_shopping_cart(self, obj):
+        """ Get get recipe in shopping cart."""
         curent_user = self.context.get('request').user
         return Download.objects.filter(recipe=obj, user=curent_user).exists()
 
 
 class RecipeFollowtSerializer(serializers.ModelSerializer):
+    """ Auxiliary serializer for dispensing prescriptions."""
     class Meta:
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time')
@@ -156,6 +165,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
+        """Method to override response fields."""
         serializer = RecipeFollowtSerializer(
                         instance.recipe,
                         context={'request': self.context.get('request')})
@@ -163,23 +173,26 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class FollowListSerializer(serializers.ModelSerializer):
-    """Serializer for subscribrd requests."""
+    """Serializer for list follows requests."""
     is_subscribed = serializers.SerializerMethodField('get_is_subscribed')
     recipes = serializers.SerializerMethodField('get_recipes')
     recipes_count = serializers.SerializerMethodField('get_recipes_count')
 
     def get_is_subscribed(self, obj):
+        """Method to get subscribers."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
         return Follow.objects.filter(author=obj, user=user).exists()
 
     def get_recipes(self, obj):
-        queryset = Recipe.objects.filter(author=obj)
-        print(queryset)
+        """Method to get recipes."""
+        limit = self.context['request'].GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj)[:limit]
         return RecipeFollowtSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
+        """Recipe counting method."""
         return Recipe.objects.filter(author=obj).count()
 
     class Meta:
@@ -189,23 +202,25 @@ class FollowListSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Serializer for subscribrd requests."""
+    """Serializer for write subscribrd requests."""
 
     class Meta:
         model = Follow
         fields = ('user', 'author')
-        validators = (
+        validators = [
             UniqueTogetherValidator(message='Такая подписка есть!',
                                     queryset=Follow.objects.all(),
-                                    fields=('user', 'author')))
+                                    fields=('user', 'author'))]
 
     def to_representation(self, instance):
+        """Method to override response fields."""
         serializer = FollowListSerializer(
                         instance.author,
                         context={'request': self.context.get('request')})
         return serializer.data
 
     def validate(self, data):
+        """Self-subscription validation."""
         user = data['user']
         author = data['author']
         if user == author:
@@ -214,7 +229,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class DownloadSerializer(serializers.ModelSerializer):
-    """Serializer for subscribrd requests."""
+    """Serializer for shopping cart requests."""
     user = serializers.SlugRelatedField(
         slug_field='username', queryset=User.objects.all())
     recipe = serializers.SlugRelatedField(
@@ -232,6 +247,7 @@ class DownloadSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
+        """Method to override response fields."""
         serializer = RecipeFollowtSerializer(
                      instance.recipe,
                      context={'request': self.context.get('request')})
@@ -241,7 +257,9 @@ class DownloadSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.Serializer):
     """Serializer for create recipe."""
     id = serializers.PrimaryKeyRelatedField(read_only=True)
-    ingredients = IngredientsForCreateRecipeSerializer(many=True, source='ingredients_recipe')
+    ingredients = IngredientsForCreateRecipeSerializer(
+          many=True,
+          source='ingredients_recipe')
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
@@ -252,14 +270,18 @@ class RecipeSerializer(serializers.Serializer):
     text = serializers.CharField()
     cooking_time = serializers.FloatField()
 
-
     def validate_cooking_time(self, cooking_time):
         """ Check thr time of cooking."""
         if cooking_time < 1:
             raise serializers.ValidationError("invalid value")
         return cooking_time
 
-
+    def to_representation(self, instance):
+        """Method to override response fields."""
+        serializer = ListRecipeSerializer(
+                        instance,
+                        context={'request': self.context.get('request')})
+        return serializer.data
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -282,7 +304,8 @@ class RecipeSerializer(serializers.Serializer):
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get('cooking_time', instance.cooking_time)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
         instance.pub_date = validated_data.get('pub_date', instance.pub_date)
         instance.tags.set(tags)
         instance.save()
@@ -290,10 +313,25 @@ class RecipeSerializer(serializers.Serializer):
         IngredientForRecipe.objects.filter(recipe=instance).all().delete()
         for ingredient in ingredients_data:
             ing = Ingredient.objects.get(id=ingredient['id'])
-            a = IngredientForRecipe.objects.create(
+            ing_for_rec = IngredientForRecipe.objects.create(
                 id=ingredient['id'],
                 ingredient=ing,
                 amount=ingredient['amount'],
                 recipe=instance)
-            a.save()
+            ing_for_rec.save()
         return instance
+
+
+class PasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(required=True)
+    current_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if data['new_password'] == data['current_password']:
+            raise serializers.ValidationError("passwords must not match")
+        try:
+            validate_password(data['new_password'])
+        except django_exceptions.ValidationError as e:
+            raise serializers.ValidationError(
+                    {"new_password": list(e.messages)})
+        return super().validate(data)

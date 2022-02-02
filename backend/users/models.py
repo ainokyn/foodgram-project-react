@@ -9,6 +9,7 @@ ROLE_CHOICES = (
 
 
 class MyUserManager(BaseUserManager):
+    """Handler for custom user."""
     use_in_migrations = True
 
     def create_user(self, email, username,
@@ -51,8 +52,6 @@ class MyUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     """The model of custom user."""
-    username = models.CharField(unique=True, max_length=150, blank=False,
-                                null=False)
     email = models.EmailField(unique=True, max_length=254, blank=False,
                               null=False)
     role = models.CharField(
@@ -61,9 +60,6 @@ class CustomUser(AbstractUser):
         default='user',
         verbose_name='role'
     )
-    first_name = models.CharField(max_length=150, blank=False, null=False)
-    last_name = models.CharField(max_length=150, blank=False, null=False)
-    is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     objects = MyUserManager()
     USERNAME_FIELD = 'email'

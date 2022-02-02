@@ -36,7 +36,7 @@ class Tag(models.Model):
         default='Завтрак',
         verbose_name='name_of_tag'
     )
-    code = models.CharField(max_length=30, verbose_name='tag_colour',
+    code = models.CharField(max_length=30, verbose_name='tag_color',
                             null=False, blank=False, unique=True,)
     slug = models.SlugField(max_length=50, verbose_name='tag_slug',
                             unique=True, null=False, blank=False)

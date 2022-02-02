@@ -1,22 +1,24 @@
-from app.models import (Download, Favorite, Follow, Ingredient, Recipe, Tag,
-                        IngredientForRecipe)
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import action
+
+from app.models import (Download, Favorite, Follow, Ingredient,
+                        IngredientForRecipe, Recipe, Tag)
+
 from .filter import FilterForRecipeFilter
 from .permissions import AnonymAdminAuthor
 from .serializers import (DownloadSerializer, FavoriteSerializer,
                           FollowListSerializer, FollowSerializer,
                           IngredientsSerializer, ListRecipeSerializer,
-                          RecipeSerializer, TagSerializer, UserSerializer,
-                          PasswordSerializer)
+                          PasswordSerializer, RecipeSerializer, TagSerializer,
+                          UserSerializer)
 
 User = get_user_model()
 
@@ -140,9 +142,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     amount += download[name]['amount']
                     download[name] = {'amount': amount, 'unit': unit}
         my_product_list = list()
-        for obj in download:
-            my_product_list.append(f'{obj} : {download[obj]["amount"]} '
-                                   f'{download[obj]["unit"]} \n')
+        for key in download:
+            my_product_list.append(f'{key} : {download[key]["amount"]} '
+                                   f'{download[key]["unit"]} \n')
         response = HttpResponse(my_product_list, content_type='text/plain')
         response['Content-Disposition'] = 'attachment; my_product_list.txt'
         return response
@@ -187,7 +189,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             raise Exception('другой метод не доступен')
 
-    @action(["post"], detail=False, url_path='set_password')
+    @action(['post'], detail=False, url_path='set_password')
     def set_password(self, request):
         user = self.request.user
         serializer = PasswordSerializer(data=request.data)

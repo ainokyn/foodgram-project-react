@@ -11,11 +11,8 @@ router.register('recipes', RecipeViewSet, basename='recipe')
 router.register('ingredients', IngredientViewSet, basename='ingredient')
 
 
-urlpatterns = [
-     path('users/subscriptions/', FollowList.as_view(),
-          name='follow_list'),
-     path('users/<int:user_id>/subscribe/', FollowAPI.as_view(),
-          name='follow'),
-     path('', include(router.urls)),
-
-]
+urlpatterns = [path('users/subscriptions/', FollowList.as_view(),
+                    name='follow_list'),
+               path('users/<int:user_id>/subscribe/', FollowAPI.as_view(),
+                    name='follow'),
+               path('', include(router.urls)), ]

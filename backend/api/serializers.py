@@ -115,7 +115,7 @@ class ListRecipeSerializer(serializers.Serializer):
     def get_ingredients(self, recipe):
         """ Get pull of ingreients for recipe."""
         queryset = IngredientForRecipe.objects.filter(
-                                                   recipe__id=recipe.id).all()
+            recipe__id=recipe.id).all()
         return IngredientsForRecipeSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
@@ -154,8 +154,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Method to override response fields."""
         serializer = RecipeFollowtSerializer(
-                        instance.recipe,
-                        context={'request': self.context.get('request')})
+            instance.recipe,
+            context={'request': self.context.get('request')})
         return serializer.data
 
 
@@ -180,7 +180,7 @@ class FollowListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email',  'username', 'first_name', 'last_name',
+        fields = ('email', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
 
 
@@ -198,8 +198,8 @@ class FollowSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Method to override response fields."""
         serializer = FollowListSerializer(
-                        instance.author,
-                        context={'request': self.context.get('request')})
+            instance.author,
+            context={'request': self.context.get('request')})
         return serializer.data
 
     def validate(self, data):
@@ -232,8 +232,8 @@ class DownloadSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Method to override response fields."""
         serializer = RecipeFollowtSerializer(
-                     instance.recipe,
-                     context={'request': self.context.get('request')})
+            instance.recipe,
+            context={'request': self.context.get('request')})
         return serializer.data
 
 
@@ -241,8 +241,8 @@ class RecipeSerializer(serializers.Serializer):
     """Serializer for create recipe."""
     id = serializers.PrimaryKeyRelatedField(read_only=True)
     ingredients = IngredientsForCreateRecipeSerializer(
-          many=True,
-          source='ingredients_recipe')
+        many=True,
+        source='ingredients_recipe')
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
@@ -268,15 +268,15 @@ class RecipeSerializer(serializers.Serializer):
     def to_representation(self, instance):
         """Method to override response fields."""
         serializer = ListRecipeSerializer(
-                        instance,
-                        context={'request': self.context.get('request')})
+            instance,
+            context={'request': self.context.get('request')})
         return serializer.data
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients_recipe')
         author = self.context.get('request').user
-        recipe = Recipe.objects.create(author=author,  **validated_data)
+        recipe = Recipe.objects.create(author=author, **validated_data)
         for ingredient in ingredients_data:
             ing = Ingredient.objects.get(id=ingredient['id'])
             IngredientForRecipe.objects.get_or_create(
@@ -322,5 +322,5 @@ class PasswordSerializer(serializers.Serializer):
             validate_password(data['new_password'])
         except django_exceptions.ValidationError as e:
             raise serializers.ValidationError(
-                    {"new_password": list(e.messages)})
+                {"new_password": list(e.messages)})
         return super().validate(data)

@@ -157,8 +157,7 @@ class Favorite(models.Model):
         verbose_name_plural = 'Favorites'
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_favorite_recipe')
-            ]
+                                    name='unique_favorite_recipe')]
 
 
 class Download(models.Model):
@@ -182,5 +181,4 @@ class Download(models.Model):
         verbose_name_plural = 'Downloads'
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_download_recipe')
-            ]
+                                    name='unique_download_recipe')]

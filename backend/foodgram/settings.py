@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -14,7 +15,7 @@ SECRET_KEY = 'w!+x1fc@0d7g-g*47bvnr$gzv19fap9wdu@v$3v70%(t5way$1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*', '51.250.16.138']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*', '51.250.16.138', 'productassistent.ddns.net']
 
 
 # Application definition
@@ -94,18 +95,12 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 AUTH_USER_MODEL = 'users.CustomUser'
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+STATIC_URL = '/static_web/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_web')
+MEDIA_URL = '/media_web/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_web')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
@@ -130,4 +125,15 @@ DJOSER = {
 
     },
 
+}
+
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default='5432'),
+    }
 }

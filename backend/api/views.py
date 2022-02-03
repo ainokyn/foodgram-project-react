@@ -1,3 +1,5 @@
+from app.models import (Download, Favorite, Follow, Ingredient,
+                        IngredientForRecipe, Recipe, Tag)
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,9 +10,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from app.models import (Download, Favorite, Follow, Ingredient,
-                        IngredientForRecipe, Recipe, Tag)
 
 from .filter import FilterForRecipeFilter
 from .permissions import AnonymAdminAuthor

@@ -2,6 +2,8 @@ import base64
 import imghdr
 import uuid
 
+from app.models import (Download, Favorite, Follow, Ingredient,
+                        IngredientForRecipe, Recipe, Tag)
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
@@ -9,9 +11,6 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
-from app.models import (Download, Favorite, Follow, Ingredient,
-                        IngredientForRecipe, Recipe, Tag)
 
 from .function import (get_favorited, get_shopping_cart, get_subscribed,
                        val_cooking_time)

@@ -106,14 +106,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         download = Download.objects.filter(recipe=recipe, user=user)
         if self.request.method == 'POST':
-            if download .exists():
+            if download.exists():
                 return Response('Этот рецепт уже в корзине',
                                 status=status.HTTP_400_BAD_REQUEST)
             Download.objects.create(user=user, recipe=recipe)
             serializer = DownloadSerializer(download, many=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            if not download .exists():
+            if not download.exists():
                 return Response('Этот рецепт отсутствует в корзине',
                                 status=status.HTTP_400_BAD_REQUEST)
             Download.objects.filter(user=user, recipe=recipe).delete()

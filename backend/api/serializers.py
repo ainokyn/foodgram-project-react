@@ -102,7 +102,7 @@ class ListRecipeSerializer(serializers.Serializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     name = serializers.CharField()
-    image = Base64ImageField()
+    image = Base64ImageField(max_length=None, use_url=True)
     text = serializers.CharField()
     cooking_time = serializers.CharField()
 
@@ -124,9 +124,16 @@ class ListRecipeSerializer(serializers.Serializer):
 
 class RecipeFollowtSerializer(serializers.ModelSerializer):
     """ Auxiliary serializer for dispensing prescriptions."""
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
-        fields = ('id', 'image', 'name', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        image_url = obj.image.url
+        return request.build_absolute_uri(image_url)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -245,7 +252,7 @@ class RecipeSerializer(serializers.Serializer):
         queryset=Tag.objects.all()
     )
     author = UserSerializer(read_only=True)
-    image = Base64ImageField()
+    image = Base64ImageField(max_length=None, use_url=True)
     name = serializers.CharField()
     text = serializers.CharField()
     cooking_time = serializers.FloatField()

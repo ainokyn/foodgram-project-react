@@ -255,15 +255,6 @@ class RecipeSerializer(serializers.Serializer):
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)
 
-    def validate(self, data):
-        ingredients_data = data.pop('ingredients_recipe')
-        for ingredient in ingredients_data:
-            amount = ingredient['amount']
-            if amount <= 0.0:
-                raise serializers.ValidationError("Количество ингредиента"
-                                                  "должно быть больше 0")
-        return data
-
     def to_representation(self, instance):
         """Method to override response fields."""
         serializer = ListRecipeSerializer(
@@ -278,9 +269,13 @@ class RecipeSerializer(serializers.Serializer):
         recipe = Recipe.objects.create(author=author, **validated_data)
         for ingredient in ingredients_data:
             ing = Ingredient.objects.get(id=ingredient['id'])
+            amount = ingredient['amount']
+            if amount <= 0:
+                raise serializers.ValidationError('Количество ингредиентов'
+                                                  ' должно быть больше 0')
             IngredientForRecipe.objects.get_or_create(
                 ingredient=ing,
-                amount=ingredient['amount'],
+                amount=amount,
                 recipe=recipe,)
         recipe.tags.set(tags)
         recipe.save()
@@ -301,10 +296,14 @@ class RecipeSerializer(serializers.Serializer):
         IngredientForRecipe.objects.filter(recipe=instance).all().delete()
         for ingredient in ingredients_data:
             ing = Ingredient.objects.get(id=ingredient['id'])
+            amount = ingredient['amount']
+            if amount <= 0:
+                raise serializers.ValidationError('Количество ингредиентов'
+                                                  ' должно быть больше 0')
             ing_for_rec = IngredientForRecipe.objects.create(
                 id=ingredient['id'],
                 ingredient=ing,
-                amount=ingredient['amount'],
+                amount=amount,
                 recipe=instance)
             ing_for_rec.save()
         return instance

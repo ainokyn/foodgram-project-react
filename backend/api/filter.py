@@ -1,7 +1,6 @@
 from app.models import Recipe, Tag
 from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
-from django_filters.fields import CSVWidget
 
 User = get_user_model()
 
@@ -14,14 +13,14 @@ class FilterForRecipeFilter(filters.FilterSet):
         field_name='is_in_shopping_cart',
         method='get_is_in_shopping_cart')
     tags = filters.ModelMultipleChoiceFilter(
-        queryset=Tag.objects.all(), widget=CSVWidget,
+        queryset=Tag.objects.all(),
         field_name='tags__slug', to_field_name='slug',
     )
 
     class Meta:
         fields = (
-            'is_favorited',
-            'is_in_shopping_cart',
+            'fovorite',
+            'download',
             'tags'
         )
 

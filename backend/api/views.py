@@ -40,15 +40,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FollowAPI(APIView):
     """Follow hange/create endpoint handler."""
-
-    def get(self, request, user_id):
-        user = self.request.user
-        author = get_object_or_404(User, id=user_id)
-        follow = Follow.objects.filter(user=user, author=author)
-        serializer = FollowSerializer(follow, many=True,
-                                      data=request.data,
-                                      context={'request': request})
-        return Response(serializer.data)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, user_id):
         data = {'user': request.user.id, 'author': user_id}

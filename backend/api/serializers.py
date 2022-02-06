@@ -95,16 +95,11 @@ class IngredientsForRecipeSerializer(serializers.ModelSerializer):
 
 class ListRecipeSerializer(serializers.Serializer):
     """Serializer for read recipe requests."""
-    id = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    name = serializers.CharField()
-    image = Base64ImageField()
-    text = serializers.CharField()
-    cooking_time = serializers.CharField()
 
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)

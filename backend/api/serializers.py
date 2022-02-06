@@ -98,11 +98,9 @@ class ListRecipeSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
     tags = TagSerializer(many=True)
     author = UserSerializer()
-    ingredients = serializers.SerializerMethodField(
-        'get_ingredients')
-    is_favorited = serializers.SerializerMethodField('get_is_favorited')
-    is_in_shopping_cart = serializers.SerializerMethodField(
-        'get_is_in_shopping_cart')
+    ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
     name = serializers.CharField()
     image = Base64ImageField()
     text = serializers.CharField()
@@ -160,9 +158,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 class FollowListSerializer(serializers.ModelSerializer):
     """Serializer for list follows requests."""
-    is_subscribed = serializers.SerializerMethodField('get_is_subscribed')
-    recipes = serializers.SerializerMethodField('get_recipes')
-    recipes_count = serializers.SerializerMethodField('get_recipes_count')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, obj):
         return get_subscribed(self, obj)

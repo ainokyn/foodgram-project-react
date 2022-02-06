@@ -174,8 +174,7 @@ class FollowListSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         """Method to get recipes."""
-        limit = self.context['request'].GET.get('recipes_limit')
-        queryset = Recipe.objects.filter(author=obj)[:limit]
+        queryset = Recipe.objects.filter(author=obj)
         return RecipeFollowtSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):

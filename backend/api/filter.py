@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class FilterForRecipeFilter(filters.FilterSet):
-    is_favorited = filters.BooleanFilter(
+    fovorite = filters.BooleanFilter(
         field_name='is_favorited',
         method='get_is_favorited')
     download = filters.BooleanFilter(

@@ -95,6 +95,7 @@ class IngredientsForRecipeSerializer(serializers.ModelSerializer):
 
 class ListRecipeSerializer(serializers.Serializer):
     """Serializer for read recipe requests."""
+    id = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all()) 
     tags = TagSerializer(many=True,)
     author = UserSerializer()
     ingredients = serializers.SerializerMethodField()

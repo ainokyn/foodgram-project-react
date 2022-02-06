@@ -10,7 +10,7 @@ class FilterForRecipeFilter(filters.FilterSet):
     is_favorited = filters.BooleanFilter(
         field_name='is_favorited',
         method='get_is_favorited')
-    is_in_shopping_cart = filters.BooleanFilter(
+    download = filters.BooleanFilter(
         field_name='is_in_shopping_cart',
         method='get_is_in_shopping_cart')
     tags = filters.ModelMultipleChoiceFilter(

@@ -102,7 +102,7 @@ class ListRecipeSerializer(serializers.Serializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     name = serializers.CharField()
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField()
     text = serializers.CharField()
     cooking_time = serializers.CharField()
 
@@ -166,9 +166,15 @@ class FollowListSerializer(serializers.ModelSerializer):
         return get_subscribed(self, obj)
 
     def get_recipes(self, obj):
-        """Method to get recipes."""
-        queryset = Recipe.objects.filter(author=obj)
-        return RecipeFollowtSerializer(queryset, many=True).data
+        request = self.context.get('request')
+        recipes_limit = request.query_params.get('recipes_limit')
+        if recipes_limit is not None:
+            recipes = obj.recipes.all()[:(int(recipes_limit))]
+        else:
+            recipes = obj.recipes.all()
+        context = {'request': request}
+        return RecipeFollowtSerializer(recipes, many=True,
+                                       context=context).data
 
     def get_recipes_count(self, obj):
         """Recipe counting method."""
@@ -244,7 +250,7 @@ class RecipeSerializer(serializers.Serializer):
         queryset=Tag.objects.all()
     )
     author = UserSerializer(read_only=True)
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField()
     name = serializers.CharField()
     text = serializers.CharField()
     cooking_time = serializers.FloatField()

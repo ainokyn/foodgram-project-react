@@ -22,6 +22,10 @@ from .serializers import (DownloadSerializer, FavoriteSerializer,
 User = get_user_model()
 
 
+class LimitOffsetPagination(PageNumberPagination):
+    page_size_query_param = 'limit'
+
+
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Tag endpoint handler."""
     permission_classes = [AllowAny]
@@ -37,6 +41,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = FilterForIngredients
+    pagination_class = None
 
 
 class FollowAPI(APIView):
@@ -64,6 +69,7 @@ class FollowList(generics.ListAPIView):
     """Follow list endpoint handler."""
     serializer_class = FollowListSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -76,7 +82,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Recipe/favorite/shopping_cart/download endpoint handler."""
     permission_classes = [AnonymAdminAuthor]
     queryset = Recipe.objects.all()
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     ordering_fields = ('pub_date')
     filterset_class = FilterForRecipeFilter
@@ -171,6 +177,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = LimitOffsetPagination
 
     @action(detail=False, methods=['get'])
     def me(self, request):

@@ -31,4 +31,3 @@ class FilterForRecipeFilter(filters.FilterSet):
         if value:
             return Recipe.objects.filter(download__user=self.request.user)
         return Recipe.objects.all()
-

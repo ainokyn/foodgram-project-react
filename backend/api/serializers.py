@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -74,8 +73,11 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
 class IngredientsForCreateRecipeSerializer(serializers.ModelSerializer):
     """Serializer for ingredients for create recipe requests."""
-    id = serializers.PrimaryKeyRelatedField(source='ingredient',
-                                            queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient',
+        queryset=Ingredient.objects.all()
+    )
+    amount = serializers.IntegerField()
 
     class Meta:
         model = IngredientForRecipe
@@ -185,7 +187,7 @@ class FollowListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
         if recipes_limit is not None:
-            recipes = obj.recipes.all()[:(int(recipes_limit))]
+            recipes = obj.recipes.all(author=obj.author)[:(int(recipes_limit))]
         else:
             recipes = obj.recipes.all()
         context = {'request': request}
@@ -251,8 +253,7 @@ class DownloadSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for create recipe."""
     ingredients = IngredientsForCreateRecipeSerializer(
-        many=True,
-        source='ingredients_recipe')
+        many=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
@@ -275,31 +276,23 @@ class RecipeSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')})
         return serializer.data
 
-    def create_ingredients(self, recipe, ingredients):
-        for ingredient in ingredients:
-            ingr = get_object_or_404(
-                Ingredient,
-                id=ingredient['ingredient'].id
-            )
-            amount = ingredient['amount']
-            if IngredientForRecipe.objects.filter(
-                    recipe=recipe,
-                    ingredient=ingr
-            ).exists():
-                amount += ingredient['amount']
-            IngredientForRecipe.objects.update_or_create(
-                recipe=recipe,
-                ingredient=ingr,
-                amount=amount)
-
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients_recipe')
-        print(ingredients)
+        ingredients_data = validated_data.pop('ingredients')
         author = self.context.get('request').user
         recipe = Recipe.objects.create(author=author, **validated_data)
+        for ingredient in ingredients_data:
+            ing = ingredient['ingredient']
+            amount = ingredient['amount']
+            if amount <= 0:
+                raise serializers.ValidationError('Количество ингредиентов'
+                                                  ' должно быть больше 0')
+            ing_for_rec = IngredientForRecipe.objects.create(
+                ingredient=ing,
+                amount=amount,
+                recipe=recipe)
         recipe.tags.set(tags)
-        self.create_ingredients(recipe, ingredients)
+        ing_for_rec.save()
         return recipe
 
     def update(self, instance, validated_data):
@@ -313,23 +306,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.pub_date = validated_data.get('pub_date', instance.pub_date)
         instance.tags.set(tags)
         instance.save()
-        ingredients_data = validated_data.pop('ingredients_recipe')
+        ingredients_data = validated_data.pop('ingredients')
         IngredientForRecipe.objects.filter(recipe=instance).all().delete()
         for ingredient in ingredients_data:
-            ing = Ingredient.objects.get(id=ingredient['id'])
+            ing = ingredient['ingredient']
             amount = ingredient['amount']
             if amount <= 0:
                 raise serializers.ValidationError('Количество ингредиентов'
                                                   ' должно быть больше 0')
-            if IngredientForRecipe.objects.filter(
-                    recipe=instance,
-                    ingredient=ing
-            ).exists():
-                amount += ingredient['amount']
-            IngredientForRecipe.objects.update_or_create(
+            ing_for_rec = IngredientForRecipe.objects.create(
                 ingredient=ing,
-                defaults={'amount': amount},
+                amount=amount,
                 recipe=instance)
+            ing_for_rec.save()
         return instance
 
 

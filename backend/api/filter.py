@@ -7,7 +7,7 @@ User = get_user_model()
 
 class FilterForRecipeFilter(filters.FilterSet):
     is_favorited = filters.BooleanFilter(
-        method='get_is_favorited')
+        method='filter')
     is_in_shopping_cart = filters.BooleanFilter(
         method='get_is_in_shopping_cart')
     tags = filters.ModelMultipleChoiceFilter(
@@ -23,12 +23,14 @@ class FilterForRecipeFilter(filters.FilterSet):
             'tags'
         )
 
-    def get_is_favorited(self, queryset, name, value):
-        if value:
-            Recipe.objects.filter(fovorite__user=self.request.user)
-        return Recipe.objects.all()
-
     def get_is_in_shopping_cart(self, queryset, name, value):
         if value:
             return Recipe.objects.filter(download__user=self.request.user)
         return Recipe.objects.all()
+
+    def filter(self, queryset, name, value):
+        if name == 'is_favorited' and value:
+            queryset = queryset.filter(
+                fovorite__user__user=self.request.user
+            )
+        return queryset

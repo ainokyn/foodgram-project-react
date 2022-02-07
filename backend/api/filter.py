@@ -22,12 +22,12 @@ class FilterForRecipeFilter(filters.FilterSet):
             'tags'
         )
 
-    def get_is_favorited(self, queryset, name, value):
+    def get_fovorite(self, queryset, name, value):
         if value:
             Recipe.objects.filter(fovorite__user=self.request.user)
         return Recipe.objects.all()
 
-    def get_is_in_shopping_cart(self, queryset, name, value):
+    def get_download(self, queryset, name, value):
         if value:
             return Recipe.objects.filter(download__user=self.request.user)
-        return Recipe.objects.filter(id=20)
+        return Recipe.objects.all()

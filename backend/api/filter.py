@@ -27,7 +27,7 @@ class FilterForRecipeFilter(filters.FilterSet):
             Recipe.objects.filter(fovorite__user=self.request.user)
         return Recipe.objects.all()
 
-def get_is_in_shopping_cart(self, queryset, name, value):
+    def get_is_in_shopping_cart(self, queryset, name, value):
         if value:
             return Recipe.objects.filter(download__user=self.request.user)
         return Recipe.objects.filter(id=20)

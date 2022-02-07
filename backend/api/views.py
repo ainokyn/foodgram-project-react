@@ -3,7 +3,7 @@ from app.models import (Download, Favorite, Follow, Ingredient,
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -33,6 +33,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Ingredient endpoint handler."""
     permission_classes = [AllowAny]
+    filter_backends = (filters.SearchFilter)
     search_fields = ('^name',)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer

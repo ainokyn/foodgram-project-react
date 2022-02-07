@@ -3,7 +3,7 @@ from app.models import (Download, Favorite, Follow, Ingredient,
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filter import FilterForRecipeFilter
+from .filter import FilterForIngredients, FilterForRecipeFilter
 from .permissions import AnonymAdminAuthor
 from .serializers import (DownloadSerializer, FavoriteSerializer,
                           FollowListSerializer, FollowSerializer,
@@ -33,14 +33,13 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Ingredient endpoint handler."""
     permission_classes = [AllowAny]
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('^name',)
+    filterset_class = FilterForIngredients
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
 
 
 class FollowAPI(APIView):
-    """Follow hange/create endpoint handler."""
+    """Follow change/create endpoint handler."""
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, user_id):
@@ -79,7 +78,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     ordering_fields = ('pub_date')
-    filterset_fields = ('author')
     filterset_class = FilterForRecipeFilter
 
     def get_serializer_class(self):

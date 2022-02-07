@@ -60,6 +60,7 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = '__all__'
+        lookup_field = 'slug'
 
 
 class IngredientsSerializer(serializers.ModelSerializer):

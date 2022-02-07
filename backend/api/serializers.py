@@ -185,14 +185,13 @@ class FollowListSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
+        queryset = Recipe.objects.filter(author=obj.author)
         recipes_limit = request.query_params.get('recipes_limit')
         if recipes_limit is not None:
-            recipes = obj.recipes.all(author=obj.author)[:(int(recipes_limit))]
-        else:
-            recipes = obj.recipes.all()
-        context = {'request': request}
-        return RecipeFollowtSerializer(recipes, many=True,
-                                       context=context).data
+            queryset = Recipe.objects.filter(
+                author=obj.author
+            )[:int(recipes_limit)]
+        return RecipeFollowtSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         """Recipe counting method."""
@@ -284,7 +283,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients_data:
             ing = ingredient['ingredient']
             amount = ingredient['amount']
-            if amount <= 0:
+            if amount <= 0.0:
                 raise serializers.ValidationError('Количество ингредиентов'
                                                   ' должно быть больше 0')
             ing_for_rec = IngredientForRecipe.objects.create(
@@ -311,7 +310,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients_data:
             ing = ingredient['ingredient']
             amount = ingredient['amount']
-            if amount <= 0:
+            if amount <= 0.0:
                 raise serializers.ValidationError('Количество ингредиентов'
                                                   ' должно быть больше 0')
             ing_for_rec = IngredientForRecipe.objects.create(

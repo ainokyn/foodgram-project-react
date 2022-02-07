@@ -33,10 +33,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Ingredient endpoint handler."""
     permission_classes = [AllowAny]
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = FilterForIngredients
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = FilterForIngredients
 
 
 class FollowAPI(APIView):

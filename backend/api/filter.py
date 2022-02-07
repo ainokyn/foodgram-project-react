@@ -1,4 +1,4 @@
-from app.models import Recipe, Tag
+from app.models import Ingredient, Recipe, Tag
 from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
 
@@ -38,3 +38,11 @@ class FilterForRecipeFilter(filters.FilterSet):
                 download__user=self.request.user
             )
         return queryset
+
+
+class FilterForIngredients(filters.FilterSet):
+    name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)

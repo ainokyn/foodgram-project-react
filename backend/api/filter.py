@@ -31,6 +31,6 @@ class FilterForRecipeFilter(filters.FilterSet):
     def filter(self, queryset, name, value):
         if name == 'is_favorited' and value:
             queryset = queryset.filter(
-                fovorite__user__user=self.request.user
+                fovorite__user=self.request.user
             )
         return queryset

@@ -284,10 +284,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             if amount <= 0:
                 raise serializers.ValidationError('Количество ингредиентов'
                                                   ' должно быть больше 0')
-            IngredientForRecipe.objects.get_or_create(
+            if IngredientForRecipe.objects.filter(
+                    recipe=recipe,
+                    ingredient=ing
+            ).exists():
+                amount += ingredient['amount']
+            IngredientForRecipe.objects.update_or_create(
                 ingredient=ing,
-                amount=amount,
-                recipe=recipe,)
+                defaults={'amount': amount},
+                recipe=recipe)
         recipe.tags.set(tags)
         recipe.save()
         return recipe
@@ -311,10 +316,14 @@ class RecipeSerializer(serializers.ModelSerializer):
             if amount <= 0:
                 raise serializers.ValidationError('Количество ингредиентов'
                                                   ' должно быть больше 0')
-            ing_for_rec = IngredientForRecipe.objects.create(
-                id=ingredient['id'],
+            if IngredientForRecipe.objects.filter(
+                    recipe=instance,
+                    ingredient=ing
+            ).exists():
+                amount += ingredient['amount']
+            ing_for_rec = IngredientForRecipe.objects.update_or_create(
                 ingredient=ing,
-                amount=amount,
+                defaults={'amount': amount},
                 recipe=instance)
             ing_for_rec.save()
         return instance

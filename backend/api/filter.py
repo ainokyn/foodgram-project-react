@@ -14,13 +14,15 @@ class FilterForRecipeFilter(filters.FilterSet):
         queryset=Tag.objects.all(),
         field_name='tags__slug', to_field_name='slug',
     )
+    author = filters.CharFilter(lookup_expr='exact')
 
     class Meta:
         model = Recipe
         fields = (
             'is_favorited',
             'is_in_shopping_cart',
-            'tags'
+            'tags',
+            'author'
         )
 
     def get_is_favorited(self, queryset, field_name, value):

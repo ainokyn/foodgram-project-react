@@ -124,9 +124,17 @@ class ListRecipeSerializer(serializers.Serializer):
 
 class RecipeFollowtSerializer(serializers.ModelSerializer):
     """ Auxiliary serializer for dispensing prescriptions."""
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time')
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        print(request)
+        image_url = obj.image.url
+        return request.build_absolute_uri(image_url)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -230,13 +238,6 @@ class DownloadSerializer(serializers.ModelSerializer):
                 fields=('user', 'recipe')
             )
         ]
-
-    def to_representation(self, instance):
-        """Method to override response fields."""
-        serializer = RecipeFollowtSerializer(
-            instance.recipe,
-            context={'request': self.context.get('request')})
-        return serializer.data
 
 
 class RecipeSerializer(serializers.Serializer):

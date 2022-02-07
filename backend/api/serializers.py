@@ -93,18 +93,31 @@ class IngredientsForRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class ListRecipeSerializer(serializers.Serializer):
+class ListRecipeSerializer(serializers.ModelSerializer):
     """Serializer for read recipe requests."""
-    id = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
     tags = TagSerializer(many=True,)
     author = UserSerializer()
-    ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
-    name = serializers.CharField()
-    image = Base64ImageField()
-    text = serializers.CharField()
-    cooking_time = serializers.CharField()
+    ingredients = serializers.SerializerMethodField(
+        method_name='get_ingredients')
+    is_favorited = serializers.SerializerMethodField(
+        method_name='get_is_favorited')
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        method_name='get_is_in_shopping_cart')
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
 
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)
@@ -129,12 +142,6 @@ class RecipeFollowtSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time')
-
-    def get_image(self, obj):
-        request = self.context.get('request')
-        print(request)
-        image_url = obj.image.url
-        return request.build_absolute_uri(image_url)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -240,9 +247,8 @@ class DownloadSerializer(serializers.ModelSerializer):
         ]
 
 
-class RecipeSerializer(serializers.Serializer):
+class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for create recipe."""
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
     ingredients = IngredientsForCreateRecipeSerializer(
         many=True,
         source='ingredients_recipe')
@@ -251,10 +257,12 @@ class RecipeSerializer(serializers.Serializer):
         queryset=Tag.objects.all()
     )
     author = UserSerializer(read_only=True)
-    image = Base64ImageField()
-    name = serializers.CharField()
-    text = serializers.CharField()
-    cooking_time = serializers.FloatField()
+    image = Base64ImageField(max_length=None, use_url=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('name', 'text', 'cooking_time', 'id', 'author',
+                  'tags', 'ingredients', 'image')
 
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)

@@ -11,6 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .filter import FilterForRecipeFilter
 from .permissions import AnonymAdminAuthor
 from .serializers import (DownloadSerializer, FavoriteSerializer,
                           FollowListSerializer, FollowSerializer,
@@ -77,6 +78,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     ordering_fields = ('pub_date')
+    filterset_fields = ('author')
+    filterset_class = FilterForRecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

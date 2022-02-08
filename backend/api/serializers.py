@@ -248,6 +248,13 @@ class DownloadSerializer(serializers.ModelSerializer):
             )
         ]
 
+    def to_representation(self, instance):
+        """Method to override response fields."""
+        serializer = RecipeFollowtSerializer(
+            instance.recipe,
+            context={'request': self.context.get('request')})
+        return serializer.data
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for create recipe."""

@@ -46,7 +46,7 @@ class FollowAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """Class that configures the display of Tag model. """
-    list_display = ('id', 'name', 'code', 'slug')
+    list_display = ('id', 'name', 'color', 'slug')
     search_fields = ('name',)
     list_filter = ('slug',)
     empty_value_display = '-пусто-'

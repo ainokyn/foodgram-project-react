@@ -54,23 +54,23 @@ Windows должен происходить внутри виртуальной 
 ```
 sudo apt install curl
 ```
-3. Эта команда скачает скрипт для установки докера
+2. Эта команда скачает скрипт для установки докера
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
 ```
-4. Эта команда запустит его
+3. Эта команда запустит его
 ```
 sh get-docker.sh
 ```
-6. В терминале надо удалить старые версии командой:
+4. В терминале надо удалить старые версии командой:
 ```
 sudo apt remove docker docker-engine docker.io containerd runc
 ```
-8. Обновить список для менеджера пакетов ATP:
+5. Обновить список для менеджера пакетов ATP:
 ```
 sudo apt update 
 ```
-10. Установить пакеты для работы через протокол https:
+6. Установить пакеты для работы через протокол https:
 ```
 sudo apt install \
   apt-transport-https \
@@ -83,11 +83,11 @@ sudo apt install \
 ```
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 ```
-9. Добавить репозиторий Docker в пакеты apt:
+8. Добавить репозиторий Docker в пакеты apt:
 ```
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" 
 ```
-10. Обновление индексов процессов:
+9. Обновление индексов процессов:
 ```
 sudo apt update 
 ```

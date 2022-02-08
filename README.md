@@ -128,4 +128,6 @@ docker-compose exec web python manage.py collectstatic --no-input
 ```
 docker-compose down -v 
 ``` 
+## Доступ к проекту
 
+Проект доступен по IP http://51.250.16.138/ или по доменному имени http://productassistent.ddns.net/

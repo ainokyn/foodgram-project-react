@@ -70,8 +70,10 @@ class Recipe(models.Model):
                                         related_name='ingredients')
     tags = models.ManyToManyField(Tag, blank=False, related_name='tags',
                                   verbose_name='recipe_tag')
-    cooking_time = models.FloatField(null=False, blank=False,
-                                     verbose_name='recipe_time', default=1)
+    cooking_time = models.PositiveIntegerField(null=False, blank=False,
+                                               verbose_name='recipe_time',
+                                               min_value=1,
+                                               max_value=1000)
     pub_date = models.DateTimeField(verbose_name='date of publication recipe',
                                     auto_now_add=True, db_index=True)
 

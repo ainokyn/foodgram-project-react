@@ -147,11 +147,6 @@ class RecipeFollowtSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time')
 
-    def get_image(self, obj):
-        request = self.context.get('request')
-        image_url = obj.image.url
-        return request.build_absolute_uri(image_url)
-
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Serializer for favorite recipe requests."""

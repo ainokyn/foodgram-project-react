@@ -141,10 +141,16 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeFollowtSerializer(serializers.ModelSerializer):
     """ Auxiliary serializer for dispensing prescriptions."""
+    image = serializers.SerializerMethodField(method_name='get_image')
 
     class Meta:
         model = Recipe
         fields = ('id', 'image', 'name', 'cooking_time')
+
+    def get_image(self, recipe):
+        request = self.context.get('request')
+        image = recipe.image.url
+        return request.build_absolute_uri(image)
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

@@ -141,7 +141,6 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeFollowtSerializer(serializers.ModelSerializer):
     """ Auxiliary serializer for dispensing prescriptions."""
-    image = serializers.SerializerMethodField(method_name='get_image')
 
     class Meta:
         model = Recipe

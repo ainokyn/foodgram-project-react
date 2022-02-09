@@ -48,12 +48,6 @@ class FollowAPI(APIView):
     """Follow change/create endpoint handler."""
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
-        queryset = Follow.objects.all()
-        serializer = FollowSerializer(queryset, many=True,
-                                      context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     def post(self, request, user_id):
         data = {'user': request.user.id, 'author': user_id}
         serializer = FollowSerializer(data=data, context={'request': request})
@@ -73,9 +67,13 @@ class FollowAPI(APIView):
 
 class FollowList(generics.ListAPIView):
     """Follow list endpoint handler."""
-    serializer_class = FollowListSerializer
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = LimitOffsetPagination
+
+    def get_serializer_context(self):
+        context = super(FollowList, self).get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
     def get_queryset(self):
         user = self.request.user

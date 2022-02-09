@@ -31,7 +31,7 @@ def get_shopping_cart(self, obj):
 
 def val_cooking_time(self, cooking_time):
     """ Check the time of cooking."""
-    if cooking_time <= 1:
+    if cooking_time < 1:
         raise serializers.ValidationError("Время приготовления должно"
-                                          "быть от 1 минуты")
+                                          " быть от 1 минуты")
     return cooking_time

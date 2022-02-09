@@ -77,7 +77,7 @@ class IngredientsForCreateRecipeSerializer(serializers.ModelSerializer):
         source='ingredient',
         queryset=Ingredient.objects.all()
     )
-    amount = serializers.IntegerField()
+    amount = serializers.FloatField()
 
     class Meta:
         model = IngredientForRecipe

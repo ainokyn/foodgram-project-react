@@ -75,7 +75,7 @@ class FollowList(generics.ListAPIView):
         user = self.request.user
         return User.objects.filter(
             following__user=user
-        ).distinct()
+        )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

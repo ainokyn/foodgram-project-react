@@ -107,6 +107,8 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart')
+    image = serializers.SerializerMethodField(
+        method_name='get_image')
 
     class Meta:
         model = Recipe
@@ -122,6 +124,9 @@ class ListRecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
+
+    def get_image(self, obj):
+        return obj.image.url
 
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)

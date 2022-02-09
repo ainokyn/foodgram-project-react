@@ -107,7 +107,6 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart')
-    image = serializers.SerializerMethodField(method_name='get_image')
 
     class Meta:
         model = Recipe
@@ -123,11 +122,6 @@ class ListRecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
-
-    def get_image(self, obj):
-        request = self.context.get('request')
-        image_url = obj.image.url
-        return request.build_absolute_uri(image_url)
 
     def validate_cooking_time(self, cooking_time):
         return val_cooking_time(self, cooking_time)
@@ -271,7 +265,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all()
     )
     author = UserSerializer(read_only=True)
-    image = Base64ImageField(max_length=None, use_url=True)
+    image = Base64ImageField(max_length=None)
 
     class Meta:
         model = Recipe

@@ -48,6 +48,12 @@ class FollowAPI(APIView):
     """Follow change/create endpoint handler."""
     permission_classes = (permissions.IsAuthenticated,)
 
+    def get(self, request, *args, **kwargs):
+        queryset = Follow.objects.all()
+        serializer = FollowSerializer(queryset, many=True,
+                                      context={"request":request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, user_id):
         data = {'user': request.user.id, 'author': user_id}
         serializer = FollowSerializer(data=data, context={'request': request})

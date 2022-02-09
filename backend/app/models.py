@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -72,8 +73,10 @@ class Recipe(models.Model):
                                   verbose_name='recipe_tag')
     cooking_time = models.PositiveIntegerField(null=False, blank=False,
                                                verbose_name='recipe_time',
-                                               min_value=1,
-                                               max_value=1000)
+                                               validators=[
+                                                MinValueValidator(1),
+                                                MaxValueValidator(1000)]
+                                               )
     pub_date = models.DateTimeField(verbose_name='date of publication recipe',
                                     auto_now_add=True, db_index=True)
 

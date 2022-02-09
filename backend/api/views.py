@@ -51,7 +51,7 @@ class FollowAPI(APIView):
     def get(self, request, *args, **kwargs):
         queryset = Follow.objects.all()
         serializer = FollowSerializer(queryset, many=True,
-                                      context={"request":request})
+                                      context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, user_id):

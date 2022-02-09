@@ -72,7 +72,7 @@ class FollowList(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_serializer_context(self):
-        context = super(FollowList, self).get_serializer_context()
+        context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
 

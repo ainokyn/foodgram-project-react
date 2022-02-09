@@ -74,8 +74,8 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(null=False, blank=False,
                                                verbose_name='recipe_time',
                                                validators=[
-                                                MinValueValidator(1),
-                                                MaxValueValidator(1000)]
+                                                   MinValueValidator(1),
+                                                   MaxValueValidator(1000)]
                                                )
     pub_date = models.DateTimeField(verbose_name='date of publication recipe',
                                     auto_now_add=True, db_index=True)

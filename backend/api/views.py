@@ -67,6 +67,7 @@ class FollowAPI(APIView):
 
 class FollowList(generics.ListAPIView):
     """Follow list endpoint handler."""
+    serializer_class = FollowListSerializer
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = LimitOffsetPagination
 

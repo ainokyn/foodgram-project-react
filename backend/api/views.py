@@ -1,6 +1,7 @@
 from app.models import (Download, Favorite, Follow, Ingredient,
                         IngredientForRecipe, Recipe, Tag)
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.shortcuts import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, status, viewsets
@@ -124,25 +125,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user = self.request.user
-        download = {}
-        dls = Download.objects.filter(user=user).all()
-        for dl in dls:
-            racepe = dl.recipe
-            ings = IngredientForRecipe.objects.filter(recipe=racepe)
-            for ing in ings:
-                amount = ing.amount
-                unit = ing.ingredient.measurement_unit
-                name = ing.ingredient.name
-                if name not in download:
-                    download[name] = {'amount': amount, 'unit': unit}
-                else:
-                    amount += download[name]['amount']
-                    download[name] = {'amount': amount, 'unit': unit}
-        my_product_list = list()
-        for key in download:
-            my_product_list.append(f'{key} : {download[key]["amount"]} '
-                                   f'{download[key]["unit"]} \n')
-        response = HttpResponse(my_product_list, content_type='text/plain')
+        obj = IngredientForRecipe.objects.filter(
+            recipe__download__user=user).values_list(
+                'ingredient__name', 'ingredient__measurement_unit').annotate(
+                    Sum('amount')).order_by('ingredient__name')
+        download = [f'{item[0]} : {item[2]} {item[1]}\n' for item in obj]
+        response = HttpResponse(download, content_type='text/plain')
         response['Content-Disposition'] = 'attachment; my_product_list.txt'
         return response
 

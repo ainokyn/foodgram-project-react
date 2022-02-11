@@ -291,38 +291,41 @@ class RecipeSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')})
         return serializer.data
 
+    def validate_ingredients(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
+            raise serializers.ValidationError('Добавьте ингредиенты')
+        for ingredient in ingredients:
+            amount = ingredient['amount']
+            if amount <= 0:
+                raise serializers.ValidationError('Количество ингредиентов'
+                                                  ' должно быть больше 0')
+        return data
+
+    def validate_tags(self, data):
+        tags = self.initial_data.get('tags')
+        if not tags:
+            raise serializers.ValidationError('Добавьте теги')
+        return data
+
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
         author = self.context.get('request').user
         recipe = Recipe.objects.create(author=author, **validated_data)
-        if not tags:
-            raise serializers.ValidationError('Добавьте теги')
-        else:
-            recipe.tags.set(tags)
-        if not ingredients_data:
-            raise serializers.ValidationError('Добавьте ингредиенты')
-        else:
-            for ingredient in ingredients_data:
-                ing = ingredient['ingredient']
-                amount = ingredient['amount']
-                if amount <= 0:
-                    raise serializers.ValidationError('Количество ингредиентов'
-                                                      ' должно быть больше 0')
-                ing_for_rec = IngredientForRecipe.objects.create(
-                    ingredient=ing,
-                    amount=amount,
-                    recipe=recipe)
-                ing_for_rec.save()
+        recipe.tags.set(tags)
+        for ingredient in ingredients_data:
+            ing_for_rec = IngredientForRecipe.objects.create(
+                ingredient=ingredient['ingredient'],
+                amount=ingredient['amount'],
+                recipe=recipe)
+            ing_for_rec.save()
         return recipe
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        if not tags:
-            raise serializers.ValidationError('Добавьте теги')
-        else:
-            instance.tags.set(tags)
-            instance.save()
+        instance.tags.set(tags)
+        instance.save()
         instance.author = validated_data.get('author', instance.author)
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
@@ -332,20 +335,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.pub_date = validated_data.get('pub_date', instance.pub_date)
         IngredientForRecipe.objects.filter(recipe=instance).all().delete()
         ingredients_data = validated_data.pop('ingredients')
-        if not ingredients_data:
-            raise serializers.ValidationError('Добавьте ингредиенты')
-        else:
-            for ingredient in ingredients_data:
-                ing = ingredient['ingredient']
-                amount = ingredient['amount']
-                if amount <= 0:
-                    raise serializers.ValidationError('Количество ингредиентов'
-                                                      ' должно быть больше 0')
-                ing_for_rec = IngredientForRecipe.objects.create(
-                    ingredient=ing,
-                    amount=amount,
-                    recipe=instance)
-                ing_for_rec.save()
+        for ingredient in ingredients_data:
+            ing_for_rec = IngredientForRecipe.objects.create(
+                ingredient=ingredient['ingredient'],
+                amount=ingredient['amount'],
+                recipe=instance)
+            ing_for_rec.save()
         return instance
 
 

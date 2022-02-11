@@ -82,7 +82,7 @@ class FollowList(generics.ListAPIView):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Recipe/favorite/shopping_cart/download endpoint handler."""
     permission_classes = [AnonymAdminAuthor]
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().order_by('-pub_date')
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     ordering_fields = ('pub_date')

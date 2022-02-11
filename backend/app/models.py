@@ -99,6 +99,7 @@ class IngredientForRecipe(models.Model):
         verbose_name='name_ingredient_for_recipe',
     )
     amount = models.FloatField(max_length=50,
+                               validators=[MinValueValidator(1)],
                                verbose_name='ingredient_for_recipe_amount')
     recipe = models.ForeignKey(
         Recipe,

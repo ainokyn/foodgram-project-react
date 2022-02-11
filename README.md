@@ -131,3 +131,4 @@ docker-compose down -v
 ## Доступ к проекту
 
 Проект доступен по IP http://51.250.16.138/ или по доменному имени http://productassistent.ddns.net/
+Админ: логин kekes@mail.ru пароль 123qwe!e!e

@@ -336,11 +336,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         IngredientForRecipe.objects.filter(recipe=instance).all().delete()
         ingredients_data = validated_data.pop('ingredients')
         for ingredient in ingredients_data:
-            ing_for_rec = IngredientForRecipe.objects.create(
+            IngredientForRecipe.objects.create(
                 ingredient=ingredient['ingredient'],
                 amount=ingredient['amount'],
                 recipe=instance)
-            ing_for_rec.save()
+        instance.save()
         return instance
 
 

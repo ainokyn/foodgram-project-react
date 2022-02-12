@@ -325,7 +325,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         instance.tags.set(tags)
-        instance.save()
         instance.author = validated_data.get('author', instance.author)
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)

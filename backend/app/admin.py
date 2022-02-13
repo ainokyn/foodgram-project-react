@@ -38,7 +38,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     """Class that configures the display of Follow model. """
     list_display = ('id', 'user', 'author')
-    search_fields = ('user__email', 'author__username', 'id', )
+    search_fields = ('user__email', 'author__email', 'id', )
     list_filter = ('id',)
     empty_value_display = '-пусто-'
 
@@ -57,7 +57,6 @@ class FavoriteAdmin(admin.ModelAdmin):
     """Class that configures the display of Favorite model. """
     list_display = ('id', 'user', 'recipe')
     search_fields = ('id', 'user__email', 'recipe__name',)
-    list_filter = ('user',)
     empty_value_display = '-пусто-'
 
 

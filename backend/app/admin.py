@@ -29,7 +29,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     """Class that configures the display of Ingredient model. """
     list_display = ('id', 'name', 'measurement_unit')
-    search_fields = ('name',)
+    search_fields = ('^name',)
     empty_value_display = '-пусто-'
 
 
@@ -38,7 +38,6 @@ class FollowAdmin(admin.ModelAdmin):
     """Class that configures the display of Follow model. """
     list_display = ('id', 'user', 'author')
     search_fields = ('user__email', 'author__email', 'id', )
-    list_filter = ('user__email',)
     empty_value_display = '-пусто-'
 
 
@@ -46,7 +45,7 @@ class FollowAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Class that configures the display of Tag model. """
     list_display = ('id', 'name', 'color', 'slug')
-    search_fields = ('name',)
+    search_fields = ('^name',)
     list_filter = ('slug',)
     empty_value_display = '-пусто-'
 

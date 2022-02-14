@@ -38,7 +38,7 @@ class FollowAdmin(admin.ModelAdmin):
     """Class that configures the display of Follow model. """
     list_display = ('id', 'user', 'author')
     search_fields = ('user__email', 'author__email', 'id', )
-    list_filter = ('id',)
+    list_filter = ('user__email',)
     empty_value_display = '-пусто-'
 
 

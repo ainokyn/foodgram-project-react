@@ -17,7 +17,7 @@ class RecipeAdmin(admin.ModelAdmin):
     """Class that configures the display of Recipe model. """
     list_display = ('id', 'author', 'name', "show_favorite")
     list_filter = ('author', 'name', 'tags',)
-    search_fields = ('author__email', 'name', 'tags__name',)
+    search_fields = ('author__username', '^name', 'tags__name',)
     empty_value_display = '-пусто-'
     inlines = (IngredientForRecipeSubjectInline,)
 
@@ -37,7 +37,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     """Class that configures the display of Follow model. """
     list_display = ('id', 'user', 'author')
-    search_fields = ('user__email', 'author__email', 'id', )
+    search_fields = ('user__username', 'author__username', 'id', )
     empty_value_display = '-пусто-'
 
 
@@ -54,7 +54,7 @@ class TagAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     """Class that configures the display of Favorite model. """
     list_display = ('id', 'user', 'recipe')
-    search_fields = ('id', 'user__email', 'recipe__name',)
+    search_fields = ('id', 'user__username', 'recipe__name',)
     empty_value_display = '-пусто-'
 
 
@@ -62,5 +62,5 @@ class FavoriteAdmin(admin.ModelAdmin):
 class DownloadAdmin(admin.ModelAdmin):
     """Class that configures the display of Download model. """
     list_display = ('id', 'user', 'recipe')
-    search_fields = ('id', 'user__email', 'recipe__name',)
+    search_fields = ('id', 'user__username', 'recipe__name',)
     empty_value_display = '-пусто-'

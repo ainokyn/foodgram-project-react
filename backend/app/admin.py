@@ -17,7 +17,7 @@ class RecipeAdmin(admin.ModelAdmin):
     """Class that configures the display of Recipe model. """
     list_display = ('id', 'author', 'name', "show_favorite")
     list_filter = ('author', 'name', 'tags',)
-    search_fields = ('author__username', '^name', 'tags__name',)
+    search_fields = ('author__username', '^name', 'tags__name', 'id',)
     empty_value_display = '-пусто-'
     inlines = (IngredientForRecipeSubjectInline,)
 

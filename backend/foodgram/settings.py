@@ -13,7 +13,7 @@ SECRET_KEY = 'w!+x1fc@0d7g-g*47bvnr$gzv19fap9wdu@v$3v70%(t5way$1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '51.250.16.138', 'productassistent.ddns.net']
+ALLOWED_HOSTS = ['localhost', '51.250.16.138', 'productassistent.ddns.net', 'web']
 
 
 # Application definition

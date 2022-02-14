@@ -72,3 +72,6 @@ class CustomUser(AbstractUser):
         ordering = ('id',)
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+
+    def __str__(self):
+        return str(self.username)

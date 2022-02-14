@@ -30,7 +30,6 @@ class IngredientAdmin(admin.ModelAdmin):
     """Class that configures the display of Ingredient model. """
     list_display = ('id', 'name', 'measurement_unit')
     search_fields = ('name',)
-    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
@@ -64,6 +63,5 @@ class FavoriteAdmin(admin.ModelAdmin):
 class DownloadAdmin(admin.ModelAdmin):
     """Class that configures the display of Download model. """
     list_display = ('id', 'user', 'recipe')
-    search_fields = ('id',)
-    list_filter = ('id',)
+    search_fields = ('id', 'user__email', 'recipe__name',)
     empty_value_display = '-пусто-'
